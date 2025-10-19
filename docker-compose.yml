@@ -1,0 +1,17 @@
+services:
+  main:
+    container_name: main
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./output:/app/output
+    # The .env file is read by docker-compose and passed to the container
+    env_file:
+      - .env
+    # Run interactive mode to allow for user input (e.g., approvals)
+    tty: true
+    stdin_open: true
+    # Keep container running
+    command: tail -f /dev/null
+    stop_grace_period: 0s

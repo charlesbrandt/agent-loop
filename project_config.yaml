@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# PROJECT CONFIGURATION: Edit this file to define your project.
+# ---------------------------------------------------------------------------
+
+# --- Project Identity ---
+project_name: "Project Manager"
+one_liner_description: "A simple, file-based command-line tool in Python to manage a list of tasks."
+
+# --- Technical & User Context ---
+# Guides the Architect in technology choices and the Analyst in user story creation.
+technical_stack:
+  language: "Python 3.12"
+  libraries: "Standard library only (json, argparse)."
+  data_storage: "A single JSON file named tasks.json in a 'data' subdirectory."
+  testing_framework: "pytest"
+
+user_profile: "A developer or technical user who is comfortable with the command line."
+
+# --- Core Features & Scope ---
+# Used by the Analyst to generate user stories. Be specific.
+core_features:
+  - "User can add a new task with a description."
+  - "User can list all tasks, showing their ID, status, and description."
+  - "User can mark a task as complete using its ID."
+  - "Task data is persisted in a JSON file between sessions."
+
+non_goals:
+  - "No GUI or web interface."
+  - "No user accounts or authentication."
+  - "No sub-tasks, priorities, or due dates."

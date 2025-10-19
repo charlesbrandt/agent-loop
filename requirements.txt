@@ -1,0 +1,9 @@
+crewai
+crewai_tools
+langchain
+langchain_community
+langchain-openai
+pyyaml
+jinja2
+python-dotenv
+pytest
