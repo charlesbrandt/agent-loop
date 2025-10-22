@@ -52,6 +52,23 @@ agents:
       You are a diligent coder who follows instructions to the letter. You do not make architectural decisions. You receive a story and a test file,
       and your sole purpose is to write the application code that satisfies the tests.
 
+  scaffolder:
+    role: "Code Scaffolder"
+    goal: >
+      To create the initial directory structure and empty files based on the ARCHITECTURE.md document.
+    backstory: >
+      You are an expert at parsing technical architecture documents and faithfully translating
+      specified file structures into actual directories and empty files. You ensure that the
+      development team has the correct boilerplate in place before they begin coding.
+
+  documentation_writer:
+    role: "Technical Documentation Specialist"
+    goal: >
+      To create clear and concise instructions for developers on how to build, run, and test the application within its Docker environment.
+    backstory: >
+      You are an expert at distilling complex technical procedures into simple, actionable steps.
+      Your documentation enables developers to quickly get up to speed with a project's operational aspects.
+
 tasks:
   # --- Planning Phase Tasks ---
   create_brief:
@@ -63,7 +80,10 @@ tasks:
     expected_output: "A well-structured Project Brief in markdown format."
 
   create_prd:
-    description: "Using the Project Brief, create a formal Product Requirements Document (PRD). Include sections for Introduction, Core Features, and Non-Goals."
+    description: >
+      Using the Project Brief, create a formal Product Requirements Document (PRD).
+      Include sections for Introduction, Core Features, and Non-Goals.
+      The non-goals for this project are: {{ non_goals }}
     expected_output: "A final, well-formatted markdown PRD, ready to be saved as 'PRD.md'."
 
   create_architecture:
@@ -72,31 +92,128 @@ tasks:
       You must adhere to this technical stack: {{ technical_stack | tojson }}
     expected_output: "A final, detailed markdown architecture document, ready to be saved as 'ARCHITECTURE.md'."
 
+  create_scaffold:
+    description: >
+      Read the architecture document and create the directory structure and empty files as specified.
+      Only create empty files that are explicitly mentioned in the architecture.
+      Return a JSON object where keys are the relative paths of the created files and values are "created".
+
+      --- ARCHITECTURE ---
+      {{ architecture_content | indent(6) }}
+    expected_output: >
+      A JSON object with created file paths as keys and "created" as values. Example:
+      {
+        "src/my_project/main.py": "created",
+        "tests/my_project/test_main.py": "created"
+      }
+
   # --- Development Phase Tasks ---
   generate_stories:
-    description: >
-      Read the PRD.md and ARCHITECTURE.md. Break down the entire project into a sequence of small, numbered development stories.
-      Each story must be self-contained and focus on one discrete piece of functionality.
+    description: |
+      You are provided with the Product Requirements Document (PRD) and the Technical Architecture Document.
+      Based on these, generate a comprehensive set of numbered development stories.
+      Each story must be self-contained, focus on a single discrete piece of functionality, and include a clear title, description,
+      and acceptance criteria.
+
+      --- PRD ---
+      {{ prd_content | indent(6) }}
+
+      --- ARCHITECTURE ---
+      {{ architecture_content | indent(6) }}
+
+      Format your response as a JSON object where keys are story filenames (e.g., 'story-01.md', 'story-02.md')
+      and values are the markdown content for each story. Ensure the story content is complete markdown.
     expected_output: >
-      A series of markdown files named 'story-01.md', 'story-02.md', etc., in the './stories' directory.
+      A JSON object with story filenames as keys (e.g., 'story-01.md') and story markdown content as values. Example:
+      {
+        "story-01.md": "# Story 01: User Authentication\\n\\n**Description:** As a user, I want to be able to register and log in to the system.\\n\\n**Acceptance Criteria:**\\n- User can register with email and password.\\n- User can log in with registered credentials.\\n- Error messages are displayed for invalid credentials.\\n",
+        "story-02.md": "# Story 02: Project Creation\\n\\n**Description:** As a logged-in user, I want to create a new project.\\n\\n**Acceptance Criteria:**\\n- User can access a 'Create Project' form.\\n- User can input project name and description.\\n- Newly created project appears in their project list.\\n"
+      }
+
+  generate_developer_instructions:
+    description: >
+      Generate clear and concise instructions for building, running, and testing the application using Docker Compose.
+      Focus on commands relevant to the `main` service defined in `docker-compose.yml`.
+      Include the following commands:
+      - How to build the Docker environment (`docker-compose build main`).
+      - How to run the application (`docker-compose run main python run.py`).
+      - How to run the application, skipping planning (`docker-compose run main python run.py --skip-planning`).
+      - How to execute the test suite (e.g., `docker-compose run main python -m pytest`).
+      Output the instructions as a markdown file, ready to be saved as 'DEVELOPER_INSTRUCTIONS.md'.
+    expected_output: "A markdown file with concise developer instructions."
 
   write_tests:
     description: >
       Read the following story and write a complete `{{ technical_stack.testing_framework }}` test file that validates its requirements. The test should be written to fail until the feature is implemented.
-      STORY: {story_content}
-    expected_output: "The complete content for the Python test file."
+
+      --- Developer Instructions ---
+      These instructions describe how to build, run, and test the application:
+      {{ developer_instructions | indent(6) }}
+
+      {% if story_content %}
+      STORY:
+      {{ story_content | indent(6) }}
+      {% endif %}
+    expected_output: "The complete, clean content for the Python test file. Do not include any conversational text or markdown. Just the raw Python code."
 
   write_code:
-    description: >
-      Read the story and the corresponding test file. Write the necessary application code to make all tests in the test file pass. Only output the complete, final content of the application file(s).
-       STORY: {story_content}
-       TEST FILE CONTENT: {test_file_content}
+    description: |
+      Read the story and the corresponding test file. Write the necessary application code to make all tests in the test file pass.
+      Only output the complete, final content of the application file(s), formatted as a JSON object.
+
+      --- Developer Instructions ---
+      These instructions describe how to build, run, and test the application:
+      {{ developer_instructions | indent(6) }}
+
+      {% if story_content %}
+      STORY:
+      {{ story_content | indent(6) }}
+      {% endif %}
+      {% if test_file_content %}
+      TEST FILE CONTENT:
+      {{ test_file_content | indent(6) }}
+      {% endif %}
+
+      Format your output as a JSON object where keys are the filenames and values are the complete, new content for those files.
+      Example:
+      ```json
+      {
+        "src/task_manager.py": "import os\\n\\ndef add_task(description):\\n    # ... implementation ...\\n    return {'id': 1, 'description': description}"
+      }
+      ```
     expected_output: "A JSON object where keys are the filenames and values are the complete, new content for those files."
 
   fix_code:
-    description: >
-      The code you previously wrote failed the tests. Analyze the error log and fix the code. Output the complete, corrected content of the application file(s).
-      STORY: {story_content}
-      TEST FILE CONTENT: {test_file_content}
-      FAILED TEST ERROR LOG: {error_log}
+    description: |
+      The code you previously wrote failed the tests. Analyze the error log and fix the code.
+      Output the complete, corrected content of the application file(s), formatted as a JSON object.
+
+      {% if story_content %}
+      STORY:
+      {{ story_content | indent(6) }}
+      {% endif %}
+      {% if test_file_content %}
+      TEST FILE CONTENT:
+      {{ test_file_content | indent(6) }}
+      {% endif %}
+      {% if story_content %}
+      STORY:
+      {{ story_content | indent(6) }}
+      {% endif %}
+      {% if test_file_content %}
+      TEST FILE CONTENT:
+      {{ test_file_content | indent(6) }}
+      {% endif %}
+      {% if error_log %}
+      FAILED TEST ERROR LOG:
+      {{ error_log | indent(6) }}
+      {% endif %}
+
+      Format your output as a JSON object where keys are the filenames and values are the complete, corrected content for the fixed files.
+      Example:
+      ```json
+      {
+        "src/task_manager.py": "import os\\n\\ndef add_task(description):\\n    # ... corrected implementation ...\\n    return {'id': 1, 'description': description}"
+      }
+      ```
     expected_output: "A JSON object where keys are the filenames and values are the complete, corrected content for the fixed files."
