@@ -8,6 +8,7 @@ one_liner_description: "A simple, file-based command-line tool in Python to mana
 
 # --- Technical & User Context ---
 # Guides the Architect in technology choices and the Analyst in user story creation.
+# NOTE: Changes here may require changes in Dockerfile and docker-compose.yml.
 technical_stack:
   language: "Python 3.12"
   libraries: "Standard library only (json, argparse)."

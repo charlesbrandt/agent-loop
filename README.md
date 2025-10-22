@@ -50,7 +50,16 @@ Configure Your Project:
   - Open and edit project_config.yaml.
   - Define your project_name, one_liner_description, technical_stack, etc. This is the only file you need to change for a new project.
 
-Bring up docker container with docker compose:
+
+```
+```
+
+```
+docker-compose run main python run.py
+```
+
+
+Bring up docker container with docker compose and run interactively
 
 ```
 docker-compose up --build
@@ -77,3 +86,12 @@ docker run --rm -it --env-file ./.env -v "$(pwd):/app" aidev
 The -it flag runs the container in interactive mode, which is necessary for the input() prompts (e.g., for brainstorming and plan approval).
      
 The agent will now begin the process. You will be prompted in your terminal to approve steps along the way. 
+
+When developing with Cline, this can be a helpful instruction to start with:
+
+```
+This project can be run with:
+docker-compose run main python run.py --skip-planning
+After any change is made, rebuild the container with: 
+docker-compose build main
+```
