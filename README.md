@@ -95,3 +95,19 @@ docker-compose run main python run.py --skip-planning
 After any change is made, rebuild the container with: 
 docker-compose build main
 ```
+
+If you want to create a more robust full stack application, this could be used as a prompt:
+
+```
+Lets initialize the project with the following technologies:
+ 
+Tech Stack & Foundation: 
+
+    Backend: Python (FastAPI)
+    Frontend: Vue (Nuxt.js)
+    Database: PostgreSQL
+    Async Job Queue: Celery with Redis (critical for running long CrewAI jobs)
+    Containerization: Set up Docker for all services from day one (should be started, but may need improvement)
+    ui code goes in ui/
+    api code goes in api/
+```
